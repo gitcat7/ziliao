@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.IStoDAO">
+    <select id="getAllSto" resultType="storeHouse">
+        select bookid, book_count from STOREHOUSE where BOOKID = #{bookid}
+    </select>
+
+    <insert id="addCount" parameterType="storehouse">
+        insert into STOREHOUSE(bookid, book_count) VALUES (#{bookid},#{book_count})
+    </insert>
+
+    <update id="updateBookSto" parameterType="storeHouse">
+        update STOREHOUSE set BOOK_COUNT = #{book_count} where BOOKID = #{bookid}
+    </update>
+
+    <update id="delSto" parameterType="java.lang.Integer">
+        update STOREHOUSE set BOOK_COUNT = BOOK_COUNT - 1 where BOOKID = #{bookid}
+    </update>
+</mapper>

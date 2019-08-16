@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                            http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+                            http://www.springframework.org/schema/context
+                            http://www.springframework.org/schema/context/spring-context-4.3.xsd
+                            http://www.springframework.org/schema/aop
+                            http://www.springframework.org/schema/aop/spring-aop.xsd
+                            http://www.springframework.org/schema/tx
+                            http://www.springframework.org/schema/tx/spring-tx.xsd
+                            http://www.springframework.org/schema/mvc
+                            http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd">
+
+
+    <!--Spring开启注解-->
+    <context:annotation-config/>
+    <context:component-scan base-package="controller"/>
+    <context:component-scan base-package="service"/>
+    <context:component-scan base-package="utils"/>
+    <context:component-scan base-package="transaction"/>
+
+    <!--转换日期格式-->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <ref bean="stringToDateConverter"/>
+            </set>
+        </property>
+    </bean>
+
+    <!--mvc开启默认注解,conversion-service="conversionService"将配置日期转换添加到mvc中的自动转换-->
+    <mvc:annotation-driven conversion-service="conversionService"/>
+
+    <!--允许扫描静态资源-->
+    <mvc:default-servlet-handler/>
+
+    <!--配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    
+    <!--数据源-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@localhost:1521:database"/>
+        <property name="username" value="zhangsan"/>
+        <property name="password" value="abc"/>
+    </bean>
+
+    <!--创建连接工厂-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--扫描包,给包下的所有类起别名-->
+        <property name="typeAliasesPackage" value="pojo"/>
+        <!--
+            扫描单个mapper
+            <property name="mapperLocations" value="classpath:dao/IBookDAO.xml"/>
+            <property name="mapperLocations">
+            <array>
+                <value>classpath:dao/IBookDAO.xml</value>
+            </array>
+        </property>
+        -->
+    </bean>
+
+    <!--扫描dao接口,mapper路径-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+        <property name="basePackage" value="dao"/>
+    </bean>
+
+    <!-- 上传文件,springmvc上传图片（文件）是通过MultipartResolver(Multipart解析器)处理的 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="GBK"/>
+        <!-- 最大内存大小 -->
+        <property name="maxInMemorySize" value="10240"/>
+        <!-- 最大文件大小，-1为不限制大小 -->
+        <property name="maxUploadSize" value="5400000"/>
+    </bean>
+
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--指定拦截的范围,**表示拦截的范围包括了目录下的内容-->
+            <mvc:mapping path="/**"/>
+            <!--上一步的拦截范围内,排除某一部分请求,不进拦截器-->
+            <mvc:exclude-mapping path="/main/login"/>
+            <mvc:exclude-mapping path="/main/allBook"/>
+            <mvc:exclude-mapping path="/main/binfo"/>
+            <mvc:exclude-mapping path="index.jsp"/>
+            <mvc:exclude-mapping path="login.jsp"/>
+            <mvc:exclude-mapping path="/js/**"/>
+            <mvc:exclude-mapping path="/css/**"/>
+            <mvc:exclude-mapping path="/images/**"/>
+            <!--自定义拦截器-->
+            <bean class="utils.LoginIntercepter"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+    <!--配置核心事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!--开启事务注解-->
+    <tx:annotation-driven/>
+
+    <!--配置通知-->
+<!--    <tx:advice id="myadvice">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="pay" isolation="READ_COMMITTED" propagation="REQUIRED" read-only="false"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+<!--    &lt;!&ndash;配置切面&ndash;&gt;-->
+<!--    <aop:config>-->
+<!--        <aop:pointcut id="mypointCut" expression="execution(* service.impl.*.*(..))"/>-->
+<!--        <aop:advisor advice-ref="myadvice" pointcut-ref="mypointCut"/>-->
+<!--    </aop:config>-->
+</beans>

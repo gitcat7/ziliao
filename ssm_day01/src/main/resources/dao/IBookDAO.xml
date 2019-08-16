@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.IBookDAO">
+
+    <sql id="bInfo">
+        <trim suffixOverrides=",">
+            bookid, book_name, public_dept, book_price, public_date, book_auth, img_path, summary
+        </trim>
+    </sql>
+    <!--book表插入的字段-->
+    <sql id="keys">
+        <trim suffixOverrides=",">
+            bookid,
+            <if test="book_name!=null">book_name,</if>
+            <if test="public_dept!=null">public_dept,</if>
+            <if test="book_price!=null">book_price,</if>
+            <if test="public_date!=null">public_date,</if>
+            <if test="book_auth!=null">book_auth,</if>
+            <if test="img_path!=null">img_path,</if>
+            <if test="summary!=null">summary,</if>
+        </trim>
+    </sql>
+
+    <!--book表插入的值-->
+    <sql id="values">
+        <trim suffixOverrides=",">
+            book_bid.nextval,
+            <if test="book_name!=null">#{book_name},</if>
+            <if test="public_dept!=null">#{public_dept},</if>
+            <if test="book_price!=null">#{book_price},</if>
+            <if test="public_date!=null">#{public_date},</if>
+            <if test="book_auth!=null">#{book_auth},</if>
+            <if test="img_path!=null">#{img_path},</if>
+            <if test="summary!=null">#{summary},</if>
+        </trim>
+    </sql>
+
+    <resultMap id="resBook" type="book">
+        <id column="bookid" property="bookid"/>
+        <result column="book_name" property="book_name"/>
+        <result column="public_dept" property="public_dept"/>
+        <result column="book_price" property="book_price"/>
+        <result column="public_date" property="public_date"/>
+        <result column="book_auth" property="book_auth"/>
+        <result column="img_path" property="img_path"/>
+        <result column="summary" property="summary"/>
+        <association property="storeHouse" column="bookid" select="dao.IStoDAO.getAllSto"/>
+    </resultMap>
+
+    <select id="getAllBook" parameterType="java.util.Map" resultMap="resBook">
+        select <include refid="bInfo"/> from
+        (select ROWNUM rn,bookid, book_name, public_dept, book_price, public_date, book_auth, img_path, summary from BOOK
+        where BOOK_NAME like '%${book_name}%') as temp
+        where rn &lt; #{cp} and rn &gt;= #{ps}
+    </select>
+
+
+    <select id="getCount" resultType="java.lang.Integer">
+        select count(BOOKID) from BOOK
+    </select>
+
+
+    <select id="bookInfo" parameterType="java.lang.String" resultMap="resBook">
+        select <include refid="bInfo"/> from BOOK where BOOK_NAME = #{book_name}
+    </select>
+
+    <select id="findBookById" parameterType="java.lang.Integer" resultType="book">
+        select <include refid="bInfo"/> from BOOK where BOOKID=#{bookid}
+    </select>
+
+
+    <insert id="addBook" parameterType="book">
+        <selectKey keyProperty="bookid" resultType="java.lang.Integer" order="AFTER">
+            select book_bid.currval from dual
+        </selectKey>
+        insert into BOOK(<include refid="keys"/>)
+        values (<include refid="values"/>)
+    </insert>
+
+</mapper>

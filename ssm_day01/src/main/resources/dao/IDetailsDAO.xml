@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.IDetailsDAO">
+    <sql id="keys">
+        <trim suffixOverrides=",">
+            details_id as detailsId,
+            book_name as bookName,
+            book_auth as bookAuth,
+            public_dept as publicDept,
+            create_date as createDate,
+            book_price as bookPrice,
+            img_path as imgPath,
+            summary,
+            order_id as orderId,
+            order_status as orderStatus,
+            book_id as bookId,
+        </trim>
+    </sql>
+
+    <sql id="values">
+        <trim suffixOverrides=",">
+            #{detailsId},
+            #{bookName},
+            #{bookAuth},
+            #{publicDept},
+            #{createDate},
+            #{orderId},
+            #{bookPrice},
+            #{imgPath},
+            #{summary},
+            #{orderStatus},
+            #{bookId},
+        </trim>
+    </sql>
+
+    <insert id="addDetails" parameterType="details">
+        insert into B_DETAILS values (<include refid="values"/>)
+    </insert>
+    
+    <select id="findDetailsById" parameterType="java.lang.Integer" resultType="details">
+        select <include refid="keys"/> from B_DETAILS where DETAILS_ID = #{detailsId}
+    </select>
+</mapper>

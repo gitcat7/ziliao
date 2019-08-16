@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.IOrderDAO">
+    <sql id="order">
+        order_id as orderId,book_name as bookName,order_status as orderStatus,user_id as userId
+    </sql>
+
+    <insert id="addOrder" parameterType="order">
+        insert into B_ORDER(order_id, book_name, user_id) values(#{orderId},#{bookName},#{userId})
+    </insert>
+
+    <select id="getOrderById" parameterType="java.lang.String" resultType="order">
+        select <include refid="order"/> from B_ORDER where ORDER_ID = #{orderId}
+    </select>
+</mapper>

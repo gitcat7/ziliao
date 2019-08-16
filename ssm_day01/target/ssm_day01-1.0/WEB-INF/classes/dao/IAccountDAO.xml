@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dao.IAccountDAO">
+
+    <sql id="account">
+        accid, accname, balance, userid
+    </sql>
+
+    <select id="findAccountByUserid" parameterType="java.lang.Integer" resultType="t_account">
+        select <include refid="account"/> from T_ACCOUNT
+        where USERID = #{userid}
+    </select>
+
+    <select id="getBalanceByAccid" parameterType="java.lang.Integer" resultType="java.lang.Double">
+        select BALANCE from T_ACCOUNT
+        where ACCID = #{accid}
+    </select>
+
+    <update id="delMoney" parameterType="java.util.Map">
+        update T_ACCOUNT set BALANCE = BALANCE - #{balance} where ACCID = #{accid}
+    </update>
+</mapper>
